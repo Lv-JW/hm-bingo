@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackMelbourne 2026 Retreat Bingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #f3b52a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px rgba(243, 181, 42, 0.5), 2px 2px 4px rgba(0,0,0,0.8);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(243, 181, 42, 0.15);
+            border: 2px solid #f3b52a;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f3b52a 0%, #e6a315 100%);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(243, 181, 42, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b6b6b 0%, #4a4a4a 100%);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+            border: 2px solid #f3b52a;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a0a0a0;
+        }
+
+        .close:hover {
+            color: #f3b52a;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #f3b52a;
+            box-shadow: 0 0 0 3px rgba(243, 181, 42, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: #f3b52a;
+            color: #000;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-weight: 700;
+        }
+
+        .boards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .board-card {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(243, 181, 42, 0.15);
+            border: 2px solid #f3b52a;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .board-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(243, 181, 42, 0.3);
+        }
+
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3a3a3a;
+        }
+
+        .board-name {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #f3b52a;
+        }
+
+        .completion-badge {
+            background: linear-gradient(135deg, #f3b52a 0%, #e6a315 100%);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .completed-badge {
+            background: linear-gradient(135deg, #f3b52a 0%, #ffcd3c 100%);
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 20px rgba(243, 181, 42, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .bingo-cell {
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            color: #e0e0e0;
+        }
+
+        .bingo-cell:hover {
+            border-color: #f3b52a;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(243, 181, 42, 0.3);
+        }
+
+        .bingo-cell.checked {
+            background: linear-gradient(135deg, #f3b52a 0%, #e6a315 100%);
+            color: #000;
+            border-color: #f3b52a;
+            font-weight: 600;
+        }
+
+        .bingo-cell.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .bingo-cell-text {
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .empty-state h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .leaderboard {
+            background: #1a1a1a;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(243, 181, 42, 0.15);
+            border: 2px solid #f3b52a;
+        }
+
+        .leaderboard h2 {
+            margin-bottom: 20px;
+            color: #f3b52a;
+        }
+
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            border-left: 4px solid #f3b52a;
+        }
+
+        .leader-rank {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #f3b52a;
+            width: 40px;
+        }
+
+        .leader-name {
+            flex: 1;
+            font-weight: 600;
+            margin-left: 15px;
+            color: #e0e0e0;
+        }
+
+        .leader-progress {
+            font-weight: 600;
+            color: #a0a0a0;
+        }
+
+        .winner {
+            border-left-color: #f3b52a;
+            background: #3a3a2a;
+            box-shadow: 0 0 20px rgba(243, 181, 42, 0.2);
+        }
+
+        .winner .leader-rank {
+            color: #ffcd3c;
+        }
+
+        .winner .leader-progress {
+            color: #f3b52a;
+        }
+
+        @media (max-width: 768px) {
+            .boards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .bingo-cell {
+                min-height: 80px;
+                padding: 10px;
+            }
+
+            .bingo-cell-text {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 HackMelbourne 2026 Retreat Bingo 🎯</h1>
+
+        <div class="controls">
+            <button class="btn" onclick="openCreateModal()">➕ Create New Bingo Sheet</button>
+            <button class="btn btn-secondary" onclick="resetAllData()" style="margin-left: 10px;">🔄 Reset All Data</button>
+        </div>
+
+        <div id="leaderboardSection"></div>
+        <div id="boardsContainer"></div>
+    </div>
+
+    <!-- Create Board Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateModal()">&times;</span>
+            <h2 style="margin-bottom: 25px; color: #f3b52a;">Create Your Bingo Sheet</h2>
+            <form id="createForm" onsubmit="createBoard(event)">
+                <div class="form-group">
+                    <label for="groupName">Group Name</label>
+                    <input type="text" id="groupName" required placeholder="Enter your group name">
+                </div>
+                
+                <div id="questionsContainer">
+                    <!-- Questions will be generated here -->
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Create Bingo Sheet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm';
+
+        // Supabase configuration
+        // TO SET UP:
+        // 1. Go to https://supabase.com/dashboard
+        // 2. Sign in with GitHub (or email)
+        // 3. Click "New Project"
+        // 4. Fill in: Name: "HackMelbourne Bingo", Database Password: (create one), Region: (closest to you)
+        // 5. Wait ~2 minutes for it to set up
+        // 6. Go to Settings (gear icon) → API
+        // 7. Copy your "Project URL" and "anon public" key below
+        
+        const SUPABASE_URL = 'https://vogesdftzikalammkgxm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvZ2VzZGZ0emlrYWxhbW1rZ3htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNzQ2NDEsImV4cCI6MjA5MTg1MDY0MX0.UGOwAQHOeLY11EMI_B5ndm1AsMXgHfxYjCuahclIxeA';
+
+        let supabase;
+        let boards = [];
+        let isSupabaseInitialized = false;
+        let realtimeChannel;
+
+        // Initialize Supabase
+        async function initSupabase() {
+            try {
+                supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                // Test connection
+                const { data, error } = await supabase.from('boards').select('count');
+                
+                if (error && error.code === '42P01') {
+                    // Table doesn't exist, create it
+                    console.log('Setting up database...');
+                    await setupDatabase();
+                }
+                
+                isSupabaseInitialized = true;
+                console.log('Supabase initialized successfully');
+                loadData();
+                subscribeToChanges();
+            } catch (error) {
+                console.error('Supabase initialization failed:', error);
+                alert('Real-time sync unavailable. Please check your Supabase configuration.');
+                renderBoards();
+            }
+        }
+
+        // Setup database table
+        async function setupDatabase() {
+            // Note: In production, you'd do this via Supabase SQL editor
+            // For now, we'll handle it with RPC or manual creation
+            console.log('Please create the table manually in Supabase SQL editor:');
+            console.log(`
+                CREATE TABLE boards (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    name TEXT NOT NULL,
+                    questions JSONB NOT NULL,
+                    checked BOOLEAN[] NOT NULL,
+                    created_at TIMESTAMPTZ DEFAULT NOW()
+                );
+                
+                ALTER TABLE boards ENABLE ROW LEVEL SECURITY;
+                
+                CREATE POLICY "Enable read access for all users" ON boards
+                    FOR SELECT USING (true);
+                
+                CREATE POLICY "Enable insert access for all users" ON boards
+                    FOR INSERT WITH CHECK (true);
+                
+                CREATE POLICY "Enable update access for all users" ON boards
+                    FOR UPDATE USING (true);
+                
+                CREATE POLICY "Enable delete access for all users" ON boards
+                    FOR DELETE USING (true);
+            `);
+        }
+
+        // Subscribe to real-time changes
+        function subscribeToChanges() {
+            if (!isSupabaseInitialized) return;
+
+            realtimeChannel = supabase
+                .channel('boards_changes')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'boards' },
+                    (payload) => {
+                        console.log('Change received!', payload);
+                        loadData();
+                    }
+                )
+                .subscribe();
+        }
+
+        // Load data from Supabase
+        async function loadData() {
+            if (!isSupabaseInitialized) {
+                renderBoards();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('boards')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                boards = data || [];
+                renderBoards();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                renderBoards();
+            }
+        }
+
+        // Save board to Supabase
+        async function saveBoard(board) {
+            if (!isSupabaseInitialized) {
+                console.log('Supabase not available');
+                return;
+            }
+
+            try {
+                if (board.id && board.id.includes('-')) {
+                    // Update existing board
+                    const { error } = await supabase
+                        .from('boards')
+                        .update({
+                            name: board.name,
+                            questions: board.questions,
+                            checked: board.checked
+                        })
+                        .eq('id', board.id);
+
+                    if (error) throw error;
+                } else {
+                    // Insert new board
+                    const { error } = await supabase
+                        .from('boards')
+                        .insert({
+                            name: board.name,
+                            questions: board.questions,
+                            checked: board.checked
+                        });
+
+                    if (error) throw error;
+                }
+            } catch (error) {
+                console.error('Error saving board:', error);
+                alert('Error saving board. Please check console for details.');
+            }
+        }
+
+        // Initialize question inputs
+        function initializeQuestionInputs() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= 9; i++) {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.innerHTML = `
+                    <label>
+                        <span class="question-number">${i}</span>
+                        Question ${i}
+                    </label>
+                    <textarea id="question${i}" required placeholder="Enter a bingo item/question"></textarea>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        window.openCreateModal = function() {
+            initializeQuestionInputs();
+            document.getElementById('createModal').style.display = 'block';
+        }
+
+        window.closeCreateModal = function() {
+            document.getElementById('createModal').style.display = 'none';
+            document.getElementById('createForm').reset();
+        }
+
+        window.createBoard = async function(event) {
+            event.preventDefault();
+            
+            const groupName = document.getElementById('groupName').value;
+            const questions = [];
+            
+            for (let i = 1; i <= 9; i++) {
+                questions.push(document.getElementById(`question${i}`).value);
+            }
+
+            const board = {
+                name: groupName,
+                questions: questions,
+                checked: Array(9).fill(false)
+            };
+
+            await saveBoard(board);
+            
+            window.closeCreateModal();
+        }
+
+        window.toggleCell = async function(boardId, cellIndex) {
+            const board = boards.find(b => b.id === boardId);
+            if (board) {
+                board.checked[cellIndex] = !board.checked[cellIndex];
+                await saveBoard(board);
+            }
+        }
+
+        function getCompletionCount(board) {
+            return board.checked.filter(c => c).length;
+        }
+
+        function isCompleted(board) {
+            return board.checked.every(c => c);
+        }
+
+        function renderLeaderboard() {
+            if (boards.length === 0) return '';
+
+            const sortedBoards = [...boards].sort((a, b) => {
+                const aComplete = isCompleted(a);
+                const bComplete = isCompleted(b);
+                if (aComplete && !bComplete) return -1;
+                if (!aComplete && bComplete) return 1;
+                return getCompletionCount(b) - getCompletionCount(a);
+            });
+
+            let html = '<div class="leaderboard"><h2>🏆 Leaderboard</h2>';
+            
+            sortedBoards.forEach((board, index) => {
+                const completed = isCompleted(board);
+                const count = getCompletionCount(board);
+                const winnerClass = completed ? 'winner' : '';
+                
+                html += `
+                    <div class="leader-item ${winnerClass}">
+                        <div class="leader-rank">${index + 1}</div>
+                        <div class="leader-name">${board.name}</div>
+                        <div class="leader-progress">${count}/9 ${completed ? '✨ WINNER!' : ''}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function renderBoards() {
+            const leaderboardSection = document.getElementById('leaderboardSection');
+            const container = document.getElementById('boardsContainer');
+            
+            if (boards.length === 0) {
+                leaderboardSection.innerHTML = '';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No Bingo Sheets Yet!</h2>
+                        <p>Create the first bingo sheet to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            leaderboardSection.innerHTML = renderLeaderboard();
+
+            let html = '<div class="boards-grid">';
+            
+            boards.forEach(board => {
+                const completionCount = getCompletionCount(board);
+                const completed = isCompleted(board);
+                
+                html += `
+                    <div class="board-card">
+                        <div class="board-header">
+                            <div class="board-name">${board.name}</div>
+                            <div class="completion-badge ${completed ? 'completed-badge' : ''}">
+                                ${completionCount}/9 ${completed ? '🎉' : ''}
+                            </div>
+                        </div>
+                        <div class="bingo-grid">
+                `;
+                
+                board.questions.forEach((question, index) => {
+                    const checkedClass = board.checked[index] ? 'checked' : '';
+                    html += `
+                        <div class="bingo-cell ${checkedClass}" onclick="toggleCell('${board.id}', ${index})">
+                            <div class="bingo-cell-text">${question}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        window.resetAllData = async function() {
+            if (confirm('Are you sure you want to reset all bingo sheets? This cannot be undone!')) {
+                if (isSupabaseInitialized) {
+                    try {
+                        const { error } = await supabase
+                            .from('boards')
+                            .delete()
+                            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+                        if (error) throw error;
+                        alert('All data has been reset!');
+                    } catch (error) {
+                        console.error('Error resetting data:', error);
+                        alert('Error resetting data. Please check console.');
+                    }
+                } else {
+                    boards = [];
+                    renderBoards();
+                    alert('All data has been reset!');
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('createModal');
+            if (event.target === modal) {
+                window.closeCreateModal();
+            }
+        }
+
+        // Initialize on load
+        initSupabase();
+    </script>
+
+</body>
+</html>
